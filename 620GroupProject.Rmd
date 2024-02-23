@@ -1,0 +1,64 @@
+---
+title: "BIOSTAT 620 Group Project 1"
+output: pdf_document
+date: "2024-02-23"
+---
+
+Import data from excel sheet
+```{r}
+library(readxl)
+library(circular)
+
+screen_data <- read_excel("BIOSTAT 620 Project 1 Group Data.xlsx")
+```
+Linear Regression Using Group Data
+```{r}
+oracle_model <- lm(Total.ST.min ~ procrastination + Pickups + pets, data = screen_data)
+```
+Federated Learning Method
+```{r}
+# Initialize variables to store total summary statistics
+SSX <- matrix(0, nrow = 3, ncol = 3)
+SSXY <- numeric(3)
+SSY <- 0
+
+# Iterate over unique ID values in screen_data (should just be 1, 2, and 3)
+for (id in unique(screen_data$ID)) {
+  # Create subset for each ID
+  data_subset <- subset(screen_data, ID == id)
+  
+  # Calculate summary statistics for the current ID
+  X <- as.matrix(data_subset[, c("procrastination", "Pickups", "pets")])
+  y <- data_subset$Total.ST.min
+  
+  # Add the summary statistics for the current ID to the totals
+  SSX <- SSX + t(X) %*% X
+  SSY <- SSY + sum(y^2)
+  SSXY <- SSXY + t(X) %*% y
+}
+
+# Calculate OLS estimates
+beta_hat <- solve(SSX) %*% SSXY
+beta_hat <- as.vector(beta_hat)
+
+# Calculate residuals
+residuals <- SSY - 2 * t(beta_hat) %*% SSXY + t(beta_hat) %*% SSX %*% beta_hat
+
+# Calculate sigma hat squared
+n <- nrow(screen_data)
+p <- ncol(X)
+sigma_hat_sq <- residuals / (n - p)
+
+# Calculate standard errors
+se <- as.vector(sqrt(sigma_hat_sq * diag(solve(SSX))))
+
+# Display results
+result <- data.frame(Coefficient = c("procrastination", "Pickups", "pets"), Estimate = beta_hat, Std_Error = se)
+print(result)
+
+# For comparison
+print(oracle_model)
+
+
+```
+
