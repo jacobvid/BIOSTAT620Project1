@@ -19,7 +19,7 @@ oracle_model <- lm(Total.ST.min ~ procrastination + Pickups + pets, data = scree
 Federated Learning Method
 ```{r}
 # Initialize variables to store total summary statistics
-SSX <- matrix(0, nrow = 3, ncol = 3)
+SSX <- matrix(0, nrow = 4, ncol = 4)
 SSXY <- numeric(3)
 SSY <- 0
 
@@ -29,7 +29,7 @@ for (id in unique(screen_data$ID)) {
   data_subset <- subset(screen_data, ID == id)
   
   # Calculate summary statistics for the current ID
-  X <- as.matrix(data_subset[, c("procrastination", "Pickups", "pets")])
+  X <- cbind(1, as.matrix(data_subset[, c("procrastination", "Pickups", "pets")]))
   y <- data_subset$Total.ST.min
   
   # Add the summary statistics for the current ID to the totals
@@ -39,8 +39,7 @@ for (id in unique(screen_data$ID)) {
 }
 
 # Calculate OLS estimates
-beta_hat <- solve(SSX) %*% SSXY
-beta_hat <- as.vector(beta_hat)
+beta_hat <- as.vector(solve(SSX) %*% SSXY)
 
 # Calculate residuals
 residuals <- SSY - 2 * t(beta_hat) %*% SSXY + t(beta_hat) %*% SSX %*% beta_hat
@@ -51,14 +50,19 @@ p <- ncol(X)
 sigma_hat_sq <- residuals / (n - p)
 
 # Calculate standard errors
-se <- as.vector(sqrt(sigma_hat_sq * diag(solve(SSX))))
+se <- c(sqrt(sigma_hat_sq * diag(solve(SSX))))
 
 # Display results
-result <- data.frame(Coefficient = c("procrastination", "Pickups", "pets"), Estimate = beta_hat, Std_Error = se)
+result <- data.frame(Coefficient = c("(Intercept)", "procrastination", "Pickups", "pets"), Estimate = c(beta_hat[1], beta_hat[-1]), Std_Error = c(se[1], se[-1]))
 print(result)
+
+# Test Stats
+t = beta_hat / se
+print(t)
 
 # For comparison
 print(oracle_model)
+summary(oracle_model)
 
 
 ```
