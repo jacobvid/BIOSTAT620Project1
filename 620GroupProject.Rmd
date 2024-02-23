@@ -53,12 +53,16 @@ sigma_hat_sq <- residuals / (n - p)
 se <- c(sqrt(sigma_hat_sq * diag(solve(SSX))))
 
 # Display results
-result <- data.frame(Coefficient = c("(Intercept)", "procrastination", "Pickups", "pets"), Estimate = c(beta_hat[1], beta_hat[-1]), Std_Error = c(se[1], se[-1]))
-print(result)
 
 # Test Stats
 t = beta_hat / se
 print(t)
+
+# Calculate p-values
+p_values <- 2 * pt(abs(t), df = n - p, lower.tail = FALSE)
+
+result <- data.frame(Coefficient = c("Intercept", "procrastination", "Pickups", "pets"), Estimate = beta_hat, Std_Error = se, P_Value = p_values)
+print(result)
 
 # For comparison
 print(oracle_model)
