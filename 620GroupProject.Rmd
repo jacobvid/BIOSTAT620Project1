@@ -3,6 +3,7 @@ title: "BIOSTAT 620 Group Project 1"
 output: pdf_document
 date: "2024-02-23"
 ---
+Github Link: https://github.com/jacobvid/BIOSTAT620Project1
 
 Import data from excel sheet
 ```{r}
