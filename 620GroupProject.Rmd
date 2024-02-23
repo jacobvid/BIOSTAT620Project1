@@ -5,10 +5,14 @@ date: "2024-02-23"
 ---
 Github Link: https://github.com/jacobvid/BIOSTAT620Project1
 
-Import data from excel sheet
+Import data from excel sheet and import necessary libraries
 ```{r}
 library(readxl)
+library(openxlsx)
 library(circular)
+library(ggplot2) 
+library(GGally)
+library(psych)
 
 screen_data <- read_excel("BIOSTAT 620 Project 1 Group Data.xlsx")
 ```
@@ -67,6 +71,19 @@ print(result)
 # For comparison
 print(oracle_model)
 summary(oracle_model)
+
+
+```
+Plots and Visuals
+```{r}
+# subset screen data
+screen_sub <- screen_data[, c("Total.ST.min", "procrastination", "Pickups", "pets")]
+
+# pair plot
+ggpairs(screen_sub)
+
+# Write the summary statistics to an Excel file
+write.xlsx(describe(screen_sub), file = "baseline_characteristics.xlsx")
 
 
 ```
